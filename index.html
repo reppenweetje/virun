@@ -56,10 +56,11 @@
         const sndSnoepje=new Audio('snoepje.m4a');
         const sndIkHebJe=new Audio('ikgebje.m4a');
         const sndIngehaald=new Audio('ingehaald.m4a');
-        sndWegwezen.preload='auto'; sndSnoepje.preload='auto'; sndIkHebJe.preload='auto'; sndIngehaald.preload='auto';
+        const sndOei=new Audio('oei.m4a');
+        sndWegwezen.preload='auto'; sndSnoepje.preload='auto'; sndIkHebJe.preload='auto'; sndIngehaald.preload='auto'; sndOei.preload='auto';
         let voiceUnlocked=false;
         function unlockVoice(){if(voiceUnlocked)return;voiceUnlocked=true;
-            [sndWegwezen,sndSnoepje,sndIkHebJe,sndIngehaald].forEach(s=>{s.volume=0;s.play().then(()=>{s.pause();s.currentTime=0;s.volume=1;}).catch(()=>{s.volume=1;});});}
+            [sndWegwezen,sndSnoepje,sndIkHebJe,sndIngehaald,sndOei].forEach(s=>{s.volume=0;s.play().then(()=>{s.pause();s.currentTime=0;s.volume=1;}).catch(()=>{s.volume=1;});});}
         function playVoice(snd){try{snd.currentTime=0;snd.volume=1;snd.play().catch(()=>{});}catch(e){}}
 
         // ========== CANVAS ==========
@@ -208,7 +209,7 @@
         // ========== ACTIONS ==========
         function doJump(){initAudio();if(state===ST.PLAY&&pAction!=='fallen'){pAction='jumping';actTimer=ACTION_DUR;playJumpSound();}}
         function doDuck(){initAudio();if(state===ST.PLAY&&pAction!=='fallen'){pAction='ducking';actTimer=ACTION_DUR;playDuckSound();}}
-        function crash(){comboCount=0;pAction='fallen';fallTimer=FALL_DUR;shakeT=0.4;shakeI=10;playCrashSound();
+        function crash(){comboCount=0;pAction='fallen';fallTimer=FALL_DUR;shakeT=0.4;shakeI=10;playCrashSound();playVoice(sndOei);
             const p=trackPos(pAngle);for(let i=0;i<8;i++)fallStars.push({x:p.x,y:p.y,
                 vx:(Math.random()-0.5)*140*scale,vy:(Math.random()-0.5)*140*scale,life:1.2,size:(4+Math.random()*5)*scale});}
 
