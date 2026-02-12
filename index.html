@@ -791,63 +791,70 @@
         // ========== SCREENS ==========
         function drawTitle(){
             drawBg();drawTrack();
-            // Overlay - dark enough for text readability
             ctx.fillStyle='rgba(50,20,80,0.55)';ctx.fillRect(0,0,W,H);
             const tx=W/2;
-            // Logo (transparent PNG)
-            let logoBottom=H*0.32;
+            // Reserve space for button at bottom
+            const bw=240*scale,bh=48*scale,btnM=12*scale;
+            const availH=H-bh-btnM-10*scale;
+            // Logo (transparent PNG) - capped to fit
+            let logoBottom=availH*0.30;
             if(logoLoaded){
-                const lMaxW=Math.min(W*(mob?0.7:0.75),440*scale),lAsp=logoImg.naturalWidth/logoImg.naturalHeight||1.5;
-                let lw=lMaxW,lh=lw/lAsp;if(mob&&lh>H*0.22){lh=H*0.22;lw=lh*lAsp;}
-                const lx=tx-lw/2,ly=H*0.01;
+                const maxLogoH=availH*(mob?0.28:0.38);
+                const lAsp=logoImg.naturalWidth/logoImg.naturalHeight||1.5;
+                const lMaxW=Math.min(W*(mob?0.7:0.65),420*scale);
+                let lw=lMaxW,lh=lw/lAsp;
+                if(lh>maxLogoH){lh=maxLogoH;lw=lh*lAsp;}
+                const ly=Math.max(4*scale,availH*0.01);
                 const bob=Math.sin(Date.now()/500)*3*scale;
-                ctx.drawImage(logoClean||logoImg,lx,ly+bob,lw,lh);
-                logoBottom=ly+lh+bob+8*scale;
+                ctx.drawImage(logoClean||logoImg,tx-lw/2,ly+bob,lw,lh);
+                logoBottom=ly+lh+bob+4*scale;
             } else {
-                ctx.fillStyle='#ffd700';ctx.font=`bold ${48*scale}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
-                ctx.fillText('VIRUN SPEL',tx,H*0.12);
-                ctx.fillStyle='#fff';ctx.font=`${17*scale}px Arial`;ctx.fillText('Ontsnap aan het boze vrouwtje!',tx,H*0.20);
-                logoBottom=H*0.26;
+                ctx.fillStyle='#ffd700';ctx.font=`bold ${40*scale}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
+                ctx.fillText('VIRUN SPEL',tx,availH*0.10);
+                ctx.fillStyle='#fff';ctx.font=`${16*scale}px Arial`;ctx.fillText('Ontsnap aan het boze vrouwtje!',tx,availH*0.18);
+                logoBottom=availH*0.23;
             }
-            // Instructions panel
-            const ins=['🏃  Vida rent rondjes op de baan','⬆   Spring over muurtjes','⬇   Buk onder poortjes',
+            // Instructions panel - compact
+            const ins=['🏃  Vida rent rondjes op de baan','⬆  Spring over muurtjes   |   ⬇  Buk onder poortjes',
                 '🍬  Pak snoepjes om haar te bevriezen!',
                 '😡  Val niet, anders haalt ze je in!','🧮  Gepakt? Los tafelsommen op!'];
-            const lineH=22*scale, panelH=ins.length*lineH+20*scale;
-            const panelY=logoBottom+4*scale, panelW=Math.min(340*scale,W*0.85);
-            // Panel background
+            const lineH=Math.min(20*scale,(availH-logoBottom)*0.065);
+            const panelH=ins.length*lineH+14*scale;
+            const panelY=logoBottom+2*scale, panelW=Math.min(360*scale,W*0.85);
             ctx.fillStyle='rgba(30,10,50,0.7)';
-            roundRect(ctx,tx-panelW/2,panelY,panelW,panelH,12*scale);ctx.fill();
+            roundRect(ctx,tx-panelW/2,panelY,panelW,panelH,10*scale);ctx.fill();
             ctx.strokeStyle='rgba(200,150,255,0.3)';ctx.lineWidth=1.5*scale;
-            roundRect(ctx,tx-panelW/2,panelY,panelW,panelH,12*scale);ctx.stroke();
-            // Instruction text
-            ctx.font=`${13*scale}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
+            roundRect(ctx,tx-panelW/2,panelY,panelW,panelH,10*scale);ctx.stroke();
+            const fSize=Math.min(13*scale,lineH*0.72);
+            ctx.font=`${fSize}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
             for(let i=0;i<ins.length;i++){
                 ctx.fillStyle='rgba(255,255,255,0.92)';
-                ctx.fillText(ins[i],tx,panelY+12*scale+i*lineH+lineH/2);}
+                ctx.fillText(ins[i],tx,panelY+8*scale+i*lineH+lineH/2);}
             // Scoreboard
-            const scores=loadScores(),hsY=panelY+panelH+10*scale;
+            const scores=loadScores(),scCount=Math.min(scores.length,mob?3:5);
+            const hsY=panelY+panelH+4*scale;
             if(scores.length>0){
-                const sbH=Math.min(scores.length,5)*18*scale+28*scale,sbW=panelW;
+                const remSpace=availH-hsY-6*scale;
+                const scLineH=Math.min(17*scale,remSpace/(scCount+1.5));
+                const sbH=scCount*scLineH+22*scale,sbW=panelW;
                 ctx.fillStyle='rgba(30,10,50,0.6)';roundRect(ctx,tx-sbW/2,hsY,sbW,sbH,10*scale);ctx.fill();
                 ctx.strokeStyle='rgba(255,215,0,0.3)';ctx.lineWidth=1*scale;roundRect(ctx,tx-sbW/2,hsY,sbW,sbH,10*scale);ctx.stroke();
-                ctx.fillStyle='#ffd700';ctx.font=`bold ${13*scale}px Arial`;ctx.fillText('🏆 SCOREBORD',tx,hsY+14*scale);
-                for(let i=0;i<Math.min(scores.length,5);i++){
-                    const sy=hsY+28*scale+i*18*scale;
+                ctx.fillStyle='#ffd700';ctx.font=`bold ${Math.min(12*scale,scLineH*0.75)}px Arial`;ctx.fillText('🏆 SCOREBORD',tx,hsY+12*scale);
+                for(let i=0;i<scCount;i++){
+                    const sy=hsY+22*scale+i*scLineH;
                     ctx.fillStyle=i===0?'#ffd700':(i===1?'#c0c0c0':(i===2?'#cd7f32':'rgba(255,255,255,0.7)'));
-                    ctx.font=`bold ${12*scale}px Arial`;ctx.textAlign='left';
+                    ctx.font=`bold ${Math.min(11*scale,scLineH*0.7)}px Arial`;ctx.textAlign='left';
                     ctx.fillText(`${i+1}.  ${scores[i].name}`,tx-sbW/2+15*scale,sy);
                     ctx.textAlign='right';ctx.fillText(formatT(scores[i].time),tx+sbW/2-15*scale,sy);
                     ctx.textAlign='center';}
             }
-            // Start button
-            const sbBot=scores.length>0?hsY+Math.min(scores.length,5)*18*scale+38*scale:hsY+10*scale;
-            const bw=240*scale,bh=52*scale,bx2=tx-bw/2,by=Math.min(Math.max(sbBot+15*scale,H*(mob?0.70:0.86)),H-bh-10*scale);
-            btnStart={x:bx2,y:by,w:bw,h:bh};
+            // Start button - fixed at bottom
+            const by=H-bh-btnM;
+            btnStart={x:tx-bw/2,y:by,w:bw,h:bh};
             const p=1+Math.sin(Date.now()/300)*0.04;ctx.save();ctx.translate(tx,by+bh/2);ctx.scale(p,p);
             ctx.fillStyle='#8e44ad';roundRect(ctx,-bw/2,-bh/2,bw,bh,15*scale);ctx.fill();
             ctx.strokeStyle='#c084e0';ctx.lineWidth=2.5*scale;roundRect(ctx,-bw/2,-bh/2,bw,bh,15*scale);ctx.stroke();
-            ctx.fillStyle='#fff';ctx.font=`bold ${23*scale}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
+            ctx.fillStyle='#fff';ctx.font=`bold ${22*scale}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';
             ctx.fillText('REN, VIDA!',0,0);ctx.restore();
         }
 
