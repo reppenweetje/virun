@@ -530,8 +530,19 @@
                 ctx.ellipse(0,5*scale,sW*0.55+prog*6*scale,4*scale,0,0,Math.PI*2);ctx.stroke();ctx.restore();
             }
             if(action==='fallen'){ctx.rotate(Math.PI/3);ctx.globalAlpha=0.7;}
-            const bob=(action==='fallen'||action==='jumping'||action==='ducking')?0:Math.sin(anim*10)*2.5*scale;
+            const isRunning=action!=='fallen'&&action!=='jumping'&&action!=='ducking';
+            const bob=isRunning?Math.sin(anim*10)*3.5*scale:0;
+            const runTilt=isRunning?Math.sin(anim*10)*0.06:0;
+            const runSquash=isRunning?1+Math.abs(Math.sin(anim*10))*0.04:1;
+            const runStretch=isRunning?1-Math.abs(Math.sin(anim*10))*0.03:1;
+            // Foot dust while running
+            if(isRunning&&Math.abs(Math.sin(anim*10))>0.85){
+                const fx=(Math.random()-0.5)*sW*0.3,fy=sH*0.3;
+                dust.push({x:pos.x+fx,y:pos.y+fy,vx:(Math.random()-0.5)*25*scale,vy:-Math.random()*15*scale,
+                    life:0.5+Math.random()*0.3,size:(2+Math.random()*3)*scale,hue:35+Math.random()*20});}
+            ctx.save();ctx.rotate(runTilt);ctx.scale(runSquash,runStretch);
             ctx.save();ctx.scale(-1,1);ctx.drawImage(img,-sW/2,-sH/2+bob,sW,sH);ctx.restore();
+            ctx.restore();
 
             // Fallen X-eyes overlay (mirrored positions)
             if(action==='fallen'){
