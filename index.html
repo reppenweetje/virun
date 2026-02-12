@@ -169,7 +169,7 @@
         let comboCount=0, comboTimer=0, comboMax=0;
         let lastLap=0, lapParts=[];
         let milestoneTimer=0, milestoneText='', nextMilestone=15;
-        let candy=null, nextCandyTime=15, npcFreezeTimer=0, candyParts=[], candyTextTimer=0;
+        let candy=null, nextCandyTime=25, npcFreezeTimer=0, candyParts=[], candyTextTimer=0;
         let btnJ={x:0,y:0,w:0,h:0}, btnD={x:0,y:0,w:0,h:0}, mathBtns=[], btnStart={x:0,y:0,w:0,h:0};
 
         // ========== INIT ==========
@@ -181,7 +181,7 @@
             comboCount=0; comboTimer=0; comboMax=0;
             lastLap=0; lapParts=[];
             milestoneTimer=0; milestoneText=''; nextMilestone=15;
-            candy=null; nextCandyTime=15; npcFreezeTimer=0; candyParts=[]; candyTextTimer=0;
+            candy=null; nextCandyTime=25; npcFreezeTimer=0; candyParts=[]; candyTextTimer=0;
             nextObs=3.5; obsInterval=OBS_INTERVAL; diffLvl=0;
             genObs(30);
             playVoice(sndWegwezen);
@@ -260,7 +260,7 @@
             if(comboTimer>0)comboTimer-=dt;
             if(milestoneTimer>0)milestoneTimer-=dt;
             // Candy spawn & pickup
-            if(!candy&&gameTime>=nextCandyTime){candy={angle:pAngle+2+Math.random()*3,life:10};nextCandyTime=gameTime+15;}
+            if(!candy&&gameTime>=nextCandyTime){candy={angle:pAngle+2+Math.random()*3,life:10};nextCandyTime=gameTime+25;}
             if(candy&&pAngle>=candy.angle&&pAction!=='fallen'){
                 npcFreezeTimer=2.0;candyTextTimer=1.8;playCandySound();playVoice(sndSnoepje);
                 const cp=trackPos(candy.angle%(Math.PI*2));
