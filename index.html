@@ -149,7 +149,7 @@
 
         // ========== CONSTANTS ==========
         const PLAYER_SPEED=0.9, NPC_SPEED=0.9, ACTION_DUR=0.55, FALL_DUR=1.4, INVINCE_DUR=0.8;
-        const START_GAP=Math.PI*1.3, SEGMENTS=28, OBS_INTERVAL=2.0, MIN_OBS=0.85, MATH_COUNT=3;
+        const START_GAP=Math.PI*1.3, SEGMENTS=28, OBS_INTERVAL=2.0, MIN_OBS=1.2, MATH_COUNT=3;
 
         // ========== STATE ==========
         const ST={TITLE:0,PLAY:1,CAUGHT:2,OVER:3,MATH:4,HSNAME:5};
@@ -190,9 +190,10 @@
             playVoice(sndWegwezen);
         }
         function genObs(n){let a=nextObs,last='';for(let i=0;i<n;i++){
-            a+=obsInterval+Math.random()*0.5;
             let t=Math.random()<0.5?'jump':'duck';
             if(t===last&&Math.random()<0.5)t=t==='jump'?'duck':'jump';
+            const switchBonus=(last!==''&&t!==last)?0.6:0;
+            a+=obsInterval+Math.random()*0.5+switchBonus;
             obstacles.push({angle:a,type:t,passed:false});last=t;}nextObs=a;}
         function moreObs(){if(pAngle+8>nextObs){genObs(15);obstacles=obstacles.filter(o=>o.angle>pAngle-Math.PI);}}
 
