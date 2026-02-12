@@ -62,8 +62,17 @@
         function playVoice(snd){try{snd.currentTime=0;snd.volume=1;snd.play().catch(()=>{});}catch(e){}}
 
         // ========== CANVAS ==========
-        let W, H, scale;
-        function resize() { W=window.innerWidth; H=window.innerHeight; canvas.width=W; canvas.height=H; scale=Math.min(W/950,H/700); }
+        let W, H, scale, tScale, mob;
+        function resize() {
+            const dpr=window.devicePixelRatio||1;
+            W=window.innerWidth; H=window.innerHeight;
+            const cw=Math.round(W*dpr),ch=Math.round(H*dpr);
+            if(canvas.width!==cw||canvas.height!==ch){canvas.width=cw;canvas.height=ch;}
+            ctx.setTransform(dpr,0,0,dpr,0,0);
+            tScale=Math.min(W/950,H/700);
+            mob=Math.min(W,H)<600;
+            scale=mob?tScale*1.8:(Math.min(W,H)<900?tScale*1.25:tScale);
+        }
         window.addEventListener('resize', resize); resize();
 
         // ========== LOAD VIDA SPRITE ==========
@@ -128,9 +137,9 @@
         let blinkTimer=0, isBlinking=false, nextBlinkTime=2+Math.random()*3;
 
         // ========== TRACK ==========
-        function cxF(){return W*0.45;} function cyF(){return H*0.46;}
-        function outerA(){return 350*scale;} function outerB(){return 230*scale;}
-        function innerA(){return 210*scale;} function innerB(){return 110*scale;}
+        function cxF(){return mob?W*0.48:W*0.45;} function cyF(){return mob?H*0.40:H*0.46;}
+        function outerA(){return 350*tScale;} function outerB(){return 230*tScale;}
+        function innerA(){return 210*tScale;} function innerB(){return 110*tScale;}
         function midA(){return(outerA()+innerA())/2;} function midB(){return(outerB()+innerB())/2;}
         function trackW(){return(outerA()-innerA())/2;}
         function trackPos(a){return{x:cxF()+midA()*Math.cos(a),y:cyF()-midB()*Math.sin(a)};}
@@ -633,8 +642,8 @@
             ctx.fillStyle='#e0c0ff';ctx.font=`bold ${22*scale}px "Courier New",monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
             ctx.fillText(ts,W/2,29*scale);
             // Scoreboard top-right
-            const scb=loadScores(),scMax=Math.min(scb.length,10),scLineH=16*scale;
-            const scbW=190*scale,scbH=scMax>0?(24*scale+scMax*scLineH+8*scale):36*scale;
+            const scb=loadScores(),scMax=Math.min(scb.length,mob?3:10),scLineH=(mob?14:16)*scale;
+            const scbW=(mob?140:190)*scale,scbH=scMax>0?(24*scale+scMax*scLineH+8*scale):36*scale;
             const scbX=W-scbW-8*scale,scbY=8*scale;
             ctx.fillStyle='rgba(30,10,50,0.65)';roundRect(ctx,scbX,scbY,scbW,scbH,10*scale);ctx.fill();
             ctx.strokeStyle='rgba(255,215,0,0.25)';ctx.lineWidth=1*scale;roundRect(ctx,scbX,scbY,scbW,scbH,10*scale);ctx.stroke();
@@ -720,7 +729,7 @@
             drawBtns();
         }
         function drawBtns(){
-            const bs=Math.max(70,80*scale),m=15*scale,bx=W-bs-m,byJ=H-bs*2-m*2,byD=H-bs-m;
+            const bs=Math.max(mob?85:70,80*scale),m=(mob?10:15)*scale,bx=W-bs-m,byJ=H-bs*2-m*2,byD=H-bs-m;
             // Jump button (top-right)
             btnJ={x:bx,y:byJ,w:bs,h:bs};
             ctx.fillStyle=pAction==='jumping'?'rgba(231,76,60,0.85)':'rgba(231,76,60,0.45)';
@@ -753,8 +762,8 @@
             // Logo (transparent PNG)
             let logoBottom=H*0.32;
             if(logoLoaded){
-                const lMaxW=Math.min(W*0.75,440*scale),lAsp=logoImg.naturalWidth/logoImg.naturalHeight||1.5;
-                const lw=lMaxW,lh=lw/lAsp;
+                const lMaxW=Math.min(W*(mob?0.7:0.75),440*scale),lAsp=logoImg.naturalWidth/logoImg.naturalHeight||1.5;
+                let lw=lMaxW,lh=lw/lAsp;if(mob&&lh>H*0.22){lh=H*0.22;lw=lh*lAsp;}
                 const lx=tx-lw/2,ly=H*0.01;
                 const bob=Math.sin(Date.now()/500)*3*scale;
                 ctx.drawImage(logoClean||logoImg,lx,ly+bob,lw,lh);
@@ -798,7 +807,7 @@
             }
             // Start button
             const sbBot=scores.length>0?hsY+Math.min(scores.length,5)*18*scale+38*scale:hsY+10*scale;
-            const bw=240*scale,bh=52*scale,bx2=tx-bw/2,by=Math.max(sbBot,H*0.86);
+            const bw=240*scale,bh=52*scale,bx2=tx-bw/2,by=Math.min(Math.max(sbBot+15*scale,H*(mob?0.70:0.86)),H-bh-10*scale);
             btnStart={x:bx2,y:by,w:bw,h:bh};
             const p=1+Math.sin(Date.now()/300)*0.04;ctx.save();ctx.translate(tx,by+bh/2);ctx.scale(p,p);
             ctx.fillStyle='#8e44ad';roundRect(ctx,-bw/2,-bh/2,bw,bh,15*scale);ctx.fill();
@@ -908,7 +917,7 @@
             drawNumpad();
         }
         function drawNumpad(){
-            mathBtns=[];const pw=Math.min(320*scale,W*0.8),bs=pw/4,px=W/2-pw/2,py=H*0.53,g=6*scale;
+            mathBtns=[];const pw=Math.min((mob?420:320)*scale,W*(mob?0.88:0.8)),bs=pw/4,px=W/2-pw/2,py=H*(mob?0.48:0.53),g=6*scale;
             const lo=[['1','2','3'],['4','5','6'],['7','8','9'],['←','0','✓']];
             for(let r=0;r<lo.length;r++)for(let c=0;c<lo[r].length;c++){const l=lo[r][c],bx=px+c*(bs+g),by=py+r*(bs+g);
                 let cl='#3a1a5e';if(l==='←')cl='#c0392b';if(l==='✓')cl='#27ae60';
@@ -951,9 +960,10 @@
         }
         function drawNameKb(){
             nameBtns=[];
-            const rows=['ABCDEFGHIJ','KLMNOPQRST','UVWXYZ ←✓'];
-            const pw=Math.min(380*scale,W*0.92),py=H*0.42,g=4*scale;
-            const maxCols=10,bs=(pw-g*(maxCols-1))/maxCols;
+            const rows=mob?['ABCDEFG','HIJKLMN','OPQRSTU','VWXYZ←✓']:['ABCDEFGHIJ','KLMNOPQRST','UVWXYZ ←✓'];
+            const maxCols=mob?7:10;
+            const pw=mob?W*0.96:Math.min(380*scale,W*0.92),py=H*(mob?0.40:0.42),g=(mob?3:4)*scale;
+            const bs=(pw-g*(maxCols-1))/maxCols;
             for(let r=0;r<rows.length;r++){
                 const row=rows[r],cols=row.length;
                 const rw=cols*bs+(cols-1)*g,rx=W/2-rw/2;
