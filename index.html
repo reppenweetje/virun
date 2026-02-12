@@ -55,7 +55,11 @@
         const sndWegwezen=new Audio('wegwezen.m4a');
         const sndSnoepje=new Audio('snoepje.m4a');
         const sndIkHebJe=new Audio('ikgebje.m4a');
-        function playVoice(snd){try{snd.currentTime=0;snd.play().catch(()=>{});}catch(e){}}
+        sndWegwezen.preload='auto'; sndSnoepje.preload='auto'; sndIkHebJe.preload='auto';
+        let voiceUnlocked=false;
+        function unlockVoice(){if(voiceUnlocked)return;voiceUnlocked=true;
+            [sndWegwezen,sndSnoepje,sndIkHebJe].forEach(s=>{s.volume=0;s.play().then(()=>{s.pause();s.currentTime=0;s.volume=1;}).catch(()=>{s.volume=1;});});}
+        function playVoice(snd){try{snd.currentTime=0;snd.volume=1;snd.play().catch(()=>{});}catch(e){}}
 
         // ========== CANVAS ==========
         let W, H, scale;
@@ -258,7 +262,7 @@
             if(candy){candy.life-=dt;if(candy.life<=0)candy=null;}
             if(candyTextTimer>0)candyTextTimer-=dt;
             // Caught?
-            if(nAngle>=pAngle){state=ST.CAUGHT;caughtTimer=0;caughtPhase=0;playCaughtSound();playVoice(sndIkHebJe);
+            if(nAngle>=pAngle){state=ST.CAUGHT;caughtTimer=0;caughtPhase=0;playCaughtSound();setTimeout(()=>playVoice(sndIkHebJe),300);
                 newHsRank=isTopScore(gameTime)?1:-1;if(gameTime>highScore)highScore=gameTime;}
             // Particles
             updateParts(dt);
@@ -980,7 +984,7 @@
             if(e.key==='ArrowUp'||e.key==='w'||e.key==='W'){e.preventDefault();doJump();}
             if(e.key==='ArrowDown'||e.key==='s'||e.key==='S'){e.preventDefault();doDuck();}
             if(e.key==='Enter'||e.key===' '){e.preventDefault();
-                if(state===ST.TITLE){initAudio();startGame();}
+                if(state===ST.TITLE){initAudio();unlockVoice();startGame();}
                 else if(state===ST.OVER){if(newHsRank>0)startHsName();else startMath();}
                 else if(state===ST.HSNAME){if(e.key==='Enter')submitName();}
                 else if(state===ST.MATH&&mathDone)startGame();else if(state===ST.MATH&&!mathDone)checkMath();}
@@ -990,7 +994,7 @@
             if(state===ST.MATH&&!mathDone){if(e.key>='0'&&e.key<='9'&&mathIn.length<4)mathIn+=e.key;
                 if(e.key==='Backspace')mathIn=mathIn.slice(0,-1);if(e.key==='-'&&mathIn==='')mathIn='-';}
         });
-        function ptr(x,y){initAudio();
+        function ptr(x,y){initAudio();unlockVoice();
             if(state===ST.TITLE){startGame();return;}
             if(state===ST.OVER){if(newHsRank>0)startHsName();else startMath();return;}
             if(state===ST.PLAY){if(inR(x,y,btnJ))doJump();else if(inR(x,y,btnD))doDuck();return;}
